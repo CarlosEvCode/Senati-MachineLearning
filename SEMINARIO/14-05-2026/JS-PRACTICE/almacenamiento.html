@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="css/estilos.css" />
+  </head>
+  <body>
+    <form action="">
+      <div>
+        <label for="mensaje">Mensaje:</label>
+        <input type="text" id="mensaje" class="input" />
+      </div>
+      <button class="button" type="button" id="conservar">Conservar</button>
+      <button class="button" type="button" id="leer">Leer</button>
+      <button class="button" type="button" id="obtener">Obtener</button>
+    </form>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const mensaje = document.getElementById("mensaje");
+        const conservar = document.getElementById("conservar");
+        const leer = document.getElementById("leer");
+        const obtener = document.getElementById("obtener");
+
+        conservar.addEventListener("click", () => {
+          console.log(localStorage.length); //0 (vacio)
+          localStorage.setItem("mensaje", mensaje.value);
+        });
+
+        leer.addEventListener("click", () => {
+          //Retorna el valor de la clave "mensaje" y lo asigna al input
+          const clave = localStorage.getItem("mensaje");
+          if (clave) {
+            mensaje.value = clave;
+          } else {
+            console.log("No hay mensaje almacenado.");
+          }
+        });
+
+        obtener.addEventListener("click", () => {
+          //Retorna el nombre de la clave en la posición 0 del localStorage
+          console.log(localStorage.key(0));
+        });
+        (function () {
+          localStorage.setItem("sesion", "1");
+          localStorage.setItem("proceso", "venta");
+          localStorage.setItem("fecha", "2026-05-14");
+          localStorage.setItem("usuario", "Carlos");
+        })();
+      });
+    </script>
+  </body>
+</html>
