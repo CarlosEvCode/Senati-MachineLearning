@@ -1,0 +1,13 @@
+{
+        "nombre": "WhatsApp",
+        "version": 2.26,
+        "espaciomb": 120,
+        "sistemas": ["Android", "IOS", "Windows"],
+        "desarrollador": "META",
+        "estaVigente": true,
+        "especificaciones": {
+                "cpu": ["ARM","X86"],
+                "ram": 2048,
+                "tampantalla": 5.5
+        }
+}
