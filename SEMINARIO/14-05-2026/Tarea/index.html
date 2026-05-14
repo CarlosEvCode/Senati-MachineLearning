@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Examen</title>
+    <style></style>
+  </head>
+  <body>
+    <h1>Examen</h1>
+    <!-- Ingreso de id, apellidos y nombre -->
+    <form action="">
+      <div>
+        <label for="id">ID:</label>
+        <input type="text" id="id" class="input" />
+        <button type="button" id="buscarEstudiante">Buscar</button>
+      </div>
+      <div>
+        <label for="apellidos">Apellidos:</label>
+        <input type="text" id="apellidos" class="input" />
+      </div>
+      <div>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" class="input" />
+      </div>
+      <button class="button" type="button" id="iniciarExamen">
+        Iniciar Examen
+      </button>
+    </form>
+
+    <!-- Contenido del examen -->
+    <form action="">
+      <div id="contenidoExamen"></div>
+      <button id="finalizarExamen">Finalizar Examen</button>
+    </form>
+  </body>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let preguntasGlobal = [];
+
+      const idInput = document.getElementById("id");
+      const apellidosInput = document.getElementById("apellidos");
+      const nombreInput = document.getElementById("nombre");
+      const iniciarExamen = document.getElementById("iniciarExamen");
+      const contenidoExamen = document.getElementById("contenidoExamen");
+      const buscarEstudiante = document.getElementById("buscarEstudiante");
+
+      // Buscar estudiante
+      buscarEstudiante.addEventListener("click", () => {
+        const id = idInput.value;
+        if (!id) {
+          alert("Por favor, ingrese un ID.");
+          return;
+        }
+
+        const estudianteJSON = localStorage.getItem("estudiante");
+        if (estudianteJSON) {
+          const estudiante = JSON.parse(estudianteJSON);
+          if (estudiante.id === id) {
+            apellidosInput.value = estudiante.apellidos || "";
+            nombreInput.value = estudiante.nombre || "";
+          } else {
+            alert("No se encontró un estudiante con ese ID.");
+          }
+        } else {
+          alert("No hay estudiantes registrados.");
+        }
+      });
+
+      // Iniciar Examen
+      iniciarExamen.addEventListener("click", async () => {
+        const id = idInput.value;
+        const apellidos = apellidosInput.value;
+        const nombre = nombreInput.value;
+
+        if (!id || !apellidos || !nombre) {
+          alert("Por favor, complete todos los campos.");
+          return;
+        }
+
+        // Cargar estudiante anterior o crear nuevo
+        let estudiante = JSON.parse(localStorage.getItem("estudiante")) || {};
+
+        // Si es el mismo estudiante se aumenta el intenta
+        if (estudiante.id === id) {
+          estudiante.intento = estudiante.intento + 1;
+        } else {
+          // Nuevo estudiante
+          estudiante = {
+            id,
+            apellidos,
+            nombre,
+            intento: 1
+          };
+        }
+
+        // Guardar estudiante 
+        localStorage.setItem("estudiante", JSON.stringify(estudiante));
+
+        alert(`Examen iniciado para ${nombre} ${apellidos} - Intento ${estudiante.intento}`);
+
+        // Cargar y mostrar preguntas
+        const data = await leerPreguntas();
+        mostrarPreguntas(data.preguntas);
+      });
+
+      // Leer preguntas
+      async function leerPreguntas() {
+        const response = await fetch("./preguntas.json");
+        const data = await response.json();
+        return data;
+      }
+
+      // Mostrar preguntas
+      function mostrarPreguntas(preguntas) {
+        preguntasGlobal = preguntas;
+
+        contenidoExamen.innerHTML = preguntas.map(pregunta => `
+          <div class="pregunta">
+            <p><strong>${pregunta.id}. ${pregunta.pregunta}</strong></p>
+            <div class="opciones">
+              ${pregunta.opciones.map(opcion => `
+                <label>
+                  <input type="radio" name="pregunta${pregunta.id}" value="${opcion}">
+                  ${opcion}
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `).join("");
+      }
+
+      // Calificar examen
+      function calificarExamen() {
+        if (preguntasGlobal.length === 0) {
+          alert("No hay preguntas cargadas.");
+          return;
+        }
+
+        let correctas = 0;
+        preguntasGlobal.forEach(pregunta => {
+          const seleccionada = document.querySelector(`input[name="pregunta${pregunta.id}"]:checked`);
+          if (seleccionada && seleccionada.value === pregunta.respuesta_correcta) {
+            correctas++;
+          }
+        });
+
+        const total = preguntasGlobal.length;
+        const porcentaje = Math.round((correctas / total) * 100);
+
+        alert(`Correctas: ${correctas} de ${total}\n Porcentaje: ${porcentaje}%`);
+
+      }
+
+      // Botón Finalizar
+      document.getElementById("finalizarExamen").addEventListener("click", calificarExamen);
+    });
+  </script>
+</html>
