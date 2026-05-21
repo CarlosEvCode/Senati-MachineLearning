@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, video -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <style>
+      body {
+        background-color: white;
+        color: black;
+      }
+      canvas {
+        margin-top: 10px;
+        border: 1px solid black;
+      }
+    </style>
+
+    <h1>Reconocimiento de Dibujo</h1>
+    <input type="text" id="descripcion" />
+    <input type="text" id="confianza" />
+
+    <script>
+      let classifier;
+      let clearButton;
+      let canvas;
+
+      function preload() {
+        // Reconocimiento de dibujos hechos en el canvas
+        classifier = ml5.imageClassifier("DoodleNet");
+      }
+
+      function setup() {
+        canvas = createCanvas(280, 280);
+        background(255);
+
+        classifier.classifyStart(canvas, gotResult);
+
+        clearButton = createButton("Limpiar canvas");
+        clearButton.mousePressed(clearCanvas);
+      }
+
+      function clearCanvas() {
+        background(255);
+      }
+
+      function draw() {
+        strokeWeight(16);
+        stroke(0, 255, 0);
+        if (mouseIsPressed) {
+          line(pmouseX, pmouseY, mouseX, mouseY);
+        }
+      }
+
+      function gotResult(results) {
+        const descripcion = results[0].label;
+        const nivelConfianza = (results[0].confidence * 100).toFixed(2);
+        document.getElementById("descripcion").value =
+          `Descripcion: ${descripcion}`;
+        document.getElementById("confianza").value =
+          `Confianza: ${nivelConfianza}%`;
+      }
+    </script>
+  </body>
+</html>

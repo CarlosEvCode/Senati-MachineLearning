@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, video -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <style>
+      body {
+        background-color: antiquewhite;
+      }
+    </style>
+
+    <h1>Reconocimiento de Video</h1>
+    <input type="text" id="descripcion" />
+    <input type="text" id="confianza" />
+
+    <script>
+      let classifier;
+      let video;
+      let label;
+
+      function preload() {
+        //Reconocimiento de imagenes
+        classifier = ml5.imageClassifier("MobileNet");
+      }
+
+      function setup() {
+        createCanvas(640, 480); //Rectangular
+        background(255); //Blanco
+
+        //Iniciamos la deteccion desde la camara
+        video = createCapture(VIDEO);
+        video.size(640, 480); //8k, 4k, FHD, HD, LQ
+        video.hide(); //Oculta el video original
+        classifier.classifyStart(video, gotResult);
+      }
+      //Renderizar cada fotograma de la camara en el canvas
+      function draw() {
+        //canvas[0] se ejecuta por cada fotograma
+        image(video, 0, 0);
+      }
+
+      function gotResult(result) {
+        const nivelConfianza = (result[0].confidence * 100).toFixed(2);
+
+        if (nivelConfianza < 50) {
+          document.getElementById("descripcion").value =
+            `Descripcion: ${result[0].label}`;
+          document.getElementById("confianza").value =
+            `Confianza: ${nivelConfianza}%`;
+        } else {
+          document.getElementById("descripcion").value = ` `;
+          document.getElementById("confianza").value = ` `;
+        }
+      }
+    </script>
+  </body>
+</html>

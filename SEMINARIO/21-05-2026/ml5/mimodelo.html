@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <input type="text" id="descripcion" placeholder="Descripcion del video" />
+    <input type="text" id="confianza" placeholder="Nivel de confianza" />
+    <script type="text/javascript">
+      let classifier; //ML5
+      let imageModelURL = "./model/"; //Ruta del modelo
+
+      //Gestion de video
+      let video;
+      let flippedVideo;
+
+      //Etiqueta
+      let label = "";
+
+      //Carga del modelo (red neuronal entrenada en una o más tareas)
+      function preload() {
+        classifier = ml5.imageClassifier(imageModelURL + "model.json");
+      }
+
+      function setup() {
+        createCanvas(320, 260);
+
+        //Camara
+        video = createCapture(VIDEO);
+        video.size(320, 260);
+        video.hide();
+
+        flippedVideo = ml5.flipImage(video);
+        classifyVideo();
+      }
+
+      function draw() {
+        background(0);
+
+        image(flippedVideo, 0, 0);
+
+        //Mostrar el resultado sobre el canvas
+      }
+
+      function classifyVideo() {
+        flippedVideo = ml5.flipImage(video);
+        classifier.classify(flippedVideo, gotResult);
+      }
+
+      function gotResult(error, results) {
+        if (error) {
+          console.error(error);
+          return;
+        }
+        document.getElementById("descripcion").value =
+          `Descripcion: ${results[0].label}`;
+        document.getElementById("confianza").value =
+          `Confianza: ${(results[0].confidence * 100).toFixed(2)}%`;
+
+        classifyVideo();
+      }
+    </script>
+  </body>
+</html>

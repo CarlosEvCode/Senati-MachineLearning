@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reconocimiento de Imágenes</title>
+
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, video -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <style>
+      body {
+        background-color: antiquewhite;
+      }
+    </style>
+
+    <h1>Selecciona una imagen</h1>
+    <select name="imagen" id="imagen" onchange="cargarImagen()">
+      <option value="">-- Selecciona una imagen --</option>
+      <option value="./images/cocodrilo.jpg">Imagen 1</option>
+      <option value="./images/gato.jpg">Imagen 2</option>
+      <option value="./images/leon2.jpg">Imagen 3</option>
+      <option value="./images/perro.jpg">Imagen 4</option>
+      <option value="./images/raton.jpg">Imagen 5</option>
+    </select>
+
+    <p id="descripcion"></p>
+    <p id="confianza"></p>
+
+    <script>
+      let classifier; //ML5
+      let img; //Imagen (jpg, png, gif)
+      let label; //Descripcion
+      let confidence; //Nivel de confianza
+
+      function preload() {
+        //Reconocimiento de imagenes
+        classifier = ml5.imageClassifier("MobileNet");
+      }
+
+      function setup() {
+        createCanvas(400, 400); //ancho x alto
+      }
+
+      function cargarImagen() {
+        const path = document.getElementById("imagen").value;
+        if (path) {
+          img = loadImage(path, mostrarResultado);
+        }
+      }
+
+      function mostrarResultado() {
+        image(img, 0, 0, width, height);
+        classifier.classify(img, gotResult);
+      }
+
+      function gotResult(results) {
+        console.log(results);
+
+
+        descripcion = `Descripcion: ${results[0].label}`;
+        confianza = `Confianza: ${(results[0].confidence * 100).toFixed(2)}%`;
+
+        document.getElementById("descripcion").innerHTML = descripcion;
+        document.getElementById("confianza").innerHTML = confianza;
+      }
+    </script>
+  </body>
+</html>

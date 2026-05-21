@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <input
+      type="text"
+      id="descripcion"
+      placeholder="Descripcion de la imagen"
+    />
+
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, video -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <h2>Reconocimiento de Imágenes</h2>
+
+    <script>
+      //console.log("Hola Mundo");
+      let classifier; //ML5
+      let img; //Imagen (jpg, png, gif)
+      let label; //Descripcion
+      let confidence; //Nivel de confianza
+
+      //Pre Configuracion
+      function preload() {
+        //Reconocimiento de imagenes
+        classifier = ml5.imageClassifier("MobileNet");
+        img = loadImage("./images/gato.jpg");
+      }
+
+      //Configuracion
+      function setup() {
+        //<canvas></canvas>
+        createCanvas(400, 400); //ancho x alto
+        classifier.classify(img, gotResult);
+        //Renderizar la imagen en el canvas
+        //image(renderiza en el canvas[0])
+        image(img, 0, 0, width, height);
+      }
+
+      //Resultados
+      function gotResult(results) {
+        console.log(results);
+
+        //Renderizar el resultado sobre el canvas
+        label = `Descripcion: ${results[0].label}`;
+        confidence = `Confianza: ${(results[0].confidence * 100).toFixed(2)}%`;
+
+        document.getElementById("descripcion").value = label;
+
+        textSize(16); //Tamaño del texto
+        fill(255); //Color fill(255) -> RGB(255, 255, 255) -> Blanco
+        stroke(0); //Borde del texto
+
+        //Agrega texto en el canvas[0], ejeX, ejeY
+        text(label, 10, 30);
+        text(confidence, 10, 50);
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("Hola Mundo");
+      });
+    </script>
+  </body>
+</html>
