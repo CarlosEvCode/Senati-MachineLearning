@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, img -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <h1>Deteccion puntos en la mano</h1>
+    
+
+    <script>
+      //Variables
+      let handPose;
+      let img;
+      let hands = [];
+
+      //Asignar el modelo
+      function preload() {
+        img = loadImage("./images/mano.jpg");
+        handPose = ml5.handPose();
+      }
+
+      //Construir / gestionar UI
+      function setup() {
+        //Renderizar el img
+        createCanvas(640, 480);
+        image(img, 0, 0);
+
+        //Iniciar deteccion manos
+        handPose.detectStart(img, gotHands);
+      }
+
+      //Renderizar el canvas
+      function draw() {
+        //Para pintar en el canvas[0] utilizamos image()
+
+        //Construir los puntos en pantalla en pantalla
+        for (let i = 0; i < hands.length; i++) {
+          let hand = hands[i]; //Informacion de una sola mano
+
+          for (let j = 0; j < hand.keypoints.length; j++) {
+            //Primer punto de la mano
+            let keypoint = hand.keypoints[j];
+            //console.log(keypoint);
+            fill(0, 255, 0); //RGB
+            noStroke(); //Sin borde,contorno
+            circle(keypoint.x, keypoint.y, 10); //EjeX, EjeY, Radio
+          }
+        }
+      }
+
+      //Resultados del modelo
+      function gotHands(result) {
+        //Retorna un array con la informacion de la mano/dedos
+        //console.log(result);
+        hands = result;
+      }
+    </script>
+  </body>
+</html>

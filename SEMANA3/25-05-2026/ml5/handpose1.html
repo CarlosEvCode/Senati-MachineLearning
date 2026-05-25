@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, video -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <h1>Deteccion puntos en la mano</h1>
+    <div>
+      <label for="totalManos">Total manos</label>
+      <input type="text" id="totalManos" />
+    </div>
+
+    <div>
+      <label for="puntosDerecha">Puntos de la mano derecha</label>
+      <input type="text" id="puntosDerecha" />
+    </div>
+
+    <div>
+      <label for="puntosIzquierda">Puntos de la mano izquierda</label>
+      <input type="text" id="puntosIzquierda" />
+    </div>
+
+    <script>
+      //Variables
+      let handPose;
+      let video;
+      let hands = [];
+
+      //Asignar el modelo
+      function preload() {
+        handPose = ml5.handPose();
+      }
+
+      //Construir / gestionar UI
+      function setup() {
+        //Renderizar el video
+        createCanvas(640, 480);
+        video = createCapture(VIDEO);
+        video.size(640, 480);
+        video.hide();
+
+        //Iniciar deteccion manos
+        handPose.detectStart(video, gotHands);
+      }
+
+      //Renderizar el canvas
+      function draw() {
+        //Para pintar en el canvas[0] utilizamos image()
+        image(video, 0, 0, width, height);
+        document.getElementById("totalManos").value = hands.length;
+
+        if (!hands.value) {
+          document.getElementById("puntosDerecha").value =
+            hands.length;
+          document.getElementById("puntosIzquierda").value =
+            hands.length;
+        }
+
+        //Construir los puntos en pantalla en pantalla
+        for (let i = 0; i < hands.length; i++) {
+          let hand = hands[i]; //Informacion de una sola mano
+
+          if (i == 0) {
+            document.getElementById("puntosDerecha").value =
+              hand.keypoints.length;
+          }
+          if (i == 1) {
+            document.getElementById("puntosIzquierda").value =
+              hand.keypoints.length;
+          }
+
+          for (let j = 0; j < hand.keypoints.length; j++) {
+            //Primer punto de la mano
+            let keypoint = hand.keypoints[j];
+            console.log(keypoint);
+            fill(0, 255, 0); //RGB
+            noStroke(); //Sin borde,contorno
+            circle(keypoint.x, keypoint.y, 10); //EjeX, EjeY, Radio
+          }
+        }
+      }
+
+      //Resultados del modelo
+      function gotHands(result) {
+        //Retorna un array con la informacion de la mano/dedos
+        //console.log(result);
+        hands = result;
+      }
+    </script>
+  </body>
+</html>
