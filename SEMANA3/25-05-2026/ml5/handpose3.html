@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, img -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <h1>Crear circulo con el indice y pulgar</h1>
+
+    <script>
+      let handPose;
+      let video;
+      let hands = [];
+
+      let pinch = 0;
+
+      function preload() {
+        handPose = ml5.handPose();
+      }
+
+      function setup() {
+        createCanvas(640, 480);
+        video = createCapture(VIDEO);
+        video.size(640, 480);
+        video.hide();
+
+        handPose.detectStart(video, gotHands);
+      }
+
+      function draw() {
+        image(video, 0, 0, width, height);
+
+        if (hands.length > 0) {
+          //Buscar el punto del indice y el pulgar
+          let indice = hands[0].index_finger_tip;
+          let pulgar = hands[0].thumb_tip;
+
+          //Dibuja un circulo entre el indice y el pulgar
+          let centerX = (indice.x + pulgar.x) / 2;
+          let centerY = (indice.y + pulgar.y) / 2;
+
+          //Calcular la distancia entre el indice y el pulgar
+          pinch = dist(indice.x, indice.y, pulgar.x, pulgar.y);
+
+          //Dibujar el circulo
+          fill(0, 0, 250, 150); // fill(R,G,B,Alpha) 0 - 255
+          stroke(0, 0, 250, 150);
+          strokeWeight(2);
+          circle(centerX, centerY, pinch);
+        }
+      }
+
+      function gotHands(result) {
+        hands = result;
+      }
+    </script>
+  </body>
+</html>
