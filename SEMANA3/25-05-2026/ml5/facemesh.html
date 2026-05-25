@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, video -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <h1>Deteccion de rostros</h1>
+
+    <script>
+      //Objetos
+      let facemesh;
+      let video;
+      let faces = [];
+      let options = {
+        maxFaces: 1,
+        refineLandmarks: false,
+        flipHorizontal: false,
+      };
+
+      function preload() {
+        //Referenciamos el modelo con las opciones previamente definidas
+        faceMesh = ml5.faceMesh(options);
+      }
+
+      function setup() {
+        createCanvas(640, 480);
+        video = createCapture(VIDEO);
+        video.size(640, 480);
+        video.hide();
+
+        //Iniciar deteccion de rostros
+        faceMesh.detectStart(video, gotFaces);
+      }
+
+      async function draw() {
+        image(video, 0, 0, width, height);
+
+        //Se itera cada rostro
+        for (let i = 0; i < faces.length; i++) {
+          //Utilizar la informaion del rostro detectado
+          //face contiene 468 puntos de referencia del rostro
+          let face = faces[i];
+          for (let j = 0; j < face.keypoints.length; j++) {
+            let keypoint = face.keypoints[j];
+            fill(0, 255, 0);
+            noStroke(); //Sin borde
+            circle(keypoint.x, keypoint.y, 5); //EjeX, EjeY, Radio
+            //console.log(keypoint);
+            //Ya leyó todo el primer rostro y los 468 puntos
+            //noLoop();
+          }
+          //Total de puntos
+          //console.log(face.keypoints.length)
+        }
+      }
+
+      function gotFaces(result) {
+        faces = result;
+      }
+    </script>
+  </body>
+</html>

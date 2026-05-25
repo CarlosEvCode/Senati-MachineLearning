@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <!-- P5.js facilitarnos la gestion de: canvas, sonido, camara, video -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.13/lib/p5.min.js"></script>
+
+    <!-- ML5.js (ML) - Ultima version -->
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+  </head>
+  <body>
+    <h1>Deteccion de ojos</h1>
+
+    <script>
+      //Objetos
+      let facemesh;
+      let video;
+      let faces = [];
+      let options = {
+        maxFaces: 1,
+        refineLandmarks: false,
+        flipHorizontal: false,
+      };
+
+      function preload() {
+        //Referenciamos el modelo con las opciones previamente definidas
+        faceMesh = ml5.faceMesh(options);
+      }
+
+      function setup() {
+        createCanvas(640, 480);
+        video = createCapture(VIDEO);
+        video.size(640, 480);
+        video.hide();
+
+        //Iniciar deteccion de rostros
+        faceMesh.detectStart(video, gotFaces);
+      }
+
+      function draw() {
+        image(video, 0, 0, width, height);
+        if (faces.length > 0 && faces[0].leftEye) {
+          fill(0, 0, 255);
+          rect(
+            faces[0].leftEye.x,
+            faces[0].leftEye.y,
+            faces[0].leftEye.width,
+            faces[0].leftEye.height,
+          );
+        }
+
+        if (faces.length > 0 && faces[0].rightEye) {
+          fill(255, 0, 0);
+          rect(
+            faces[0].rightEye.x,
+            faces[0].rightEye.y,
+            faces[0].rightEye.width,
+            faces[0].rightEye.height,
+          );
+        }
+        drawPartsKeypoints();
+      }
+
+      function drawPartsKeypoints() {
+        if (faces.length > 0) {
+          for (let i = 0; i < faces[0].leftEye.keypoints.length; i++) {
+            let eye = faces[0].leftEye.keypoints[i];
+            fill(0, 0, 255);
+            circle(eye.x, eye.y, 5);
+          }
+          for (let i = 0; i < faces[0].rightEye.keypoints.length; i++) {
+            let eye = faces[0].rightEye.keypoints[i];
+            fill(255, 0, 0);
+            circle(eye.x, eye.y, 5);
+          }
+        }
+      }
+
+      function gotFaces(result) {
+        faces = result;
+      }
+    </script>
+  </body>
+</html>
