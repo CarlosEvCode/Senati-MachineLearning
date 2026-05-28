@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+</head>
+<body>
+    <script>
+        //Crearemos 3 arreglos para gestionar las 3 figuras geometricas
+        let circles = []
+        let squares = []
+        let triangles = []
+
+        //Objeto entrenamiento
+        let shapeClassifier
+
+        function preload() {
+            for (let i = 0; i < 100; i++) {
+                //nf() funcion integrada en P5.js y sirve para formatear un numero
+                let index = nf((i + 1), 3, 0) //001, 002, 003, ..., 100
+                circles[i] = loadImage(`GeneradorFormas/data/circle${index}.png`)
+                squares[i] = loadImage(`GeneradorFormas/data/square${index}.png`)
+                triangles[i] = loadImage(`GeneradorFormas/data/triangle${index}.png`)
+            }
+
+        }
+
+        function setup() {
+            //homologacion = las imagenes deben tener el mismo tamaño
+            //Configuracion de la red neuronal
+            let options = {
+                inputs: [64, 64, 4], //ancho, alto, canales de color
+                task: 'imageClassification',
+                debug: true
+            }
+
+            //Iniciamos una nueva RED NEURONAL
+            shapeClassifier = ml5.neuralNetwork(options)
+
+            //Pasamos los datos de entrenamiento (contenido en los arrays)
+            for (let i = 0; i < 100; i++) {
+                //Algoritmo SUPERVISADO = imagen + etiqueta
+                shapeClassifier.addData({ image: circles[i]}, { label: 'Circulo' })
+                shapeClassifier.addData({ image: squares[i]}, { label: 'Cuadrado' })
+                shapeClassifier.addData({ image: triangles[i]}, { label: 'Triangulo' })
+            }
+
+            //Normalizacion (revision)
+            shapeClassifier.normalizeData()
+
+            //Iniciar el entrenamiento
+            shapeClassifier.train({ epochs: 50 }, finishedTraining)
+        }
+
+        function finishedTraining() {
+            console.log('Entrenamiento finalizado')
+            //Guardar fisicamente los 3 archivos (2 JSON + 1 BIN)
+            shapeClassifier.save()
+        }
+    </script>
+</body>
+</html>
