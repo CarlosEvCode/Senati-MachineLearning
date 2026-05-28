@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+  </head>
+  <body style="background-color: antiquewhite">
+    <script>
+      //Objetos
+      let shapeClassifier;
+      let canvas;
+      let resultDiv;
+      let inputImage;
+      let clearButton;
+
+      //Configuracion de red neuronal
+      function setup() {
+        canvas = createCanvas(400, 400);
+
+        //Configuracion de red neuronal
+        let options = {
+          inputs: [64, 64, 4], //ancho, alto, canales de color
+          task: "imageClassification",
+        };
+
+        //Red neuronal
+        shapeClassifier = ml5.neuralNetwork(options);
+
+        //Ubicacion de nuestro modelo ya entrenado
+        const modelDetails = {
+          model: "model/model.json",
+          metadata: "model/model_meta.json",
+          weights: "model/model.weights.bin",
+        };
+
+        //Canvas blanco
+        background(255);
+
+        //Boton reset
+        clearButton = createButton("Limpiar");
+        clearButton.mousePressed(cleanCanvas);
+
+        //Texto inicial en el DIV
+        resultDiv = createDiv("Modelo cargado correctamente");
+
+        //Enviar los datos para su analisis
+        //CANVAS (400, 400) > INPUTIMAGE (reescalar) > RED NEURONAL
+        inputImage = createGraphics(64, 64); //Controlador, intermediario
+
+        //Red Neuronal recibe el modelo personalizado
+        shapeClassifier.load(modelDetails, modelLoaded);
+      } //setup
+
+      function modelLoaded() {
+        //Otros procesos...
+        classifyImage();
+      }
+
+      //Analizar los datos de entrada (canvas)
+      function classifyImage() {
+        //Reescalado...
+        inputImage.copy(canvas, 0, 0, width, height, 0, 0, 64, 64);
+        shapeClassifier.classify({ image: inputImage }, gotResults);
+      }
+
+      function cleanCanvas() {
+        background(255); //Blanco
+      }
+
+      //Pintar sobre el canvas
+      function draw() {
+        //Boton primario
+        if (mouseIsPressed) {
+          strokeWeight(8);
+          stroke(0);
+          line(pmouseX, pmouseY, mouseX, mouseY);
+        }
+      }
+
+      function gotResults(err, result) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+
+        //No hay error...
+        let descripcion = result[0].label;
+        let confianza = result[0].confidence;
+
+        resultDiv.html(`${descripcion} - Confianza: ${confianza}`);
+
+        classifyImage();
+      }
+    </script>
+  </body>
+</html>
